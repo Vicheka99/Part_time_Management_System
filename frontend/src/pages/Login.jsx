@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 const ROLES = ["Admin", "Teacher", "Student"];
 
@@ -65,7 +66,7 @@ export default function Login() {
             <div className="login-field">
               <div className="login-field-head">
                 <label htmlFor="password">Password</label>
-                <a href="#">Forgot password?</a>
+                <Link to="/forgot-password">Forgot password?</Link>
               </div>
               <div className="password-wrap">
                 <input
