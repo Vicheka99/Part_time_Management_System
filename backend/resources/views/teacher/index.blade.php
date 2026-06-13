@@ -43,7 +43,7 @@
                         <span class="teacher-status">Active</span>
                     </div>
                     <div class="teacher-contact">
-                        <span><i class="mdi mdi-book-open-variant"></i> {{ $courseNames ?: 'No courses assigned' }}</span>
+                        <span><i class="mdi mdi-book-open-variant"></i> {{ $courseNames ?: 'No classes assigned' }}</span>
                         <span><i class="mdi mdi-email-outline"></i> {{ $teacher->email }}</span>
                     </div>
                     <div class="teacher-metrics">
@@ -53,7 +53,9 @@
                     </div>
                     <div class="teacher-card-actions">
                         <button data-url="{{ route('edit.user', $teacher->id) }}" id="btn-open-create" data-modal-title="Edit Teacher" class="teacher-card-edit">Edit</button>
-                        <button type="button" class="teacher-card-delete" data-delete-teacher="{{ $teacher->id }}" data-teacher-name="{{ $teacher->fullName() }}">Delete</button>
+                        @can('remove users')
+                            <button type="button" class="teacher-card-delete" data-delete-record data-delete-url="{{ route('delete.user') }}" data-delete-id="{{ $teacher->id }}" data-delete-param="id" data-delete-type="teacher" data-delete-name="{{ $teacher->fullName() }}">Delete</button>
+                        @endcan
                     </div>
                 </article>
             @empty

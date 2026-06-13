@@ -1,17 +1,17 @@
 @extends('master_dashboard')
 
-@section('title', 'Courses')
+@section('title', 'Classes')
 
 @section('content-title')
     <span class="student-page-heading">
-        <strong>Courses</strong>
-        <small>{{ $courses->total() }} {{ Str::plural('course', $courses->total()) }} this semester</small>
+        <strong>Classes</strong>
+        <small>{{ $courses->total() }} {{ Str::plural('class', $courses->total()) }} this semester</small>
     </span>
 @endsection
 
 @section('breadcrumb')
-    <button data-url="{{ route('create.course') }}" id="btn-open-create" data-modal-title="New Course" class="btn student-add-button">
-        <i class="mdi mdi-plus"></i> New Course
+    <button data-url="{{ route('create.course') }}" id="btn-open-create" data-modal-title="New Class" class="btn student-add-button">
+        <i class="mdi mdi-plus"></i> New Class
     </button>
 @endsection
 
@@ -19,9 +19,9 @@
     <div class="col-12 course-directory">
         <div class="course-toolbar">
             <form action="{{ route('index.course') }}" class="student-search">
-                <input type="search" name="search" value="{{ request('search') }}" placeholder="Search courses...">
+                <input type="search" name="search" value="{{ request('search') }}" placeholder="Search classes...">
             </form>
-            <div class="course-view-toggle" aria-label="Course view">
+            <div class="course-view-toggle" aria-label="Class view">
                 <button class="active" type="button" data-course-view="grid" aria-label="Grid view"><i class="mdi mdi-view-grid-outline"></i></button>
                 <button type="button" data-course-view="list" aria-label="List view"><i class="mdi mdi-format-list-bulleted"></i></button>
             </div>
@@ -29,7 +29,7 @@
 
         <div class="course-grid" data-course-grid>
             <div class="course-list-header">
-                <span>Course</span>
+                <span>Class</span>
                 <span>Teacher</span>
                 <span>Students</span>
                 <span>Start Date</span>
@@ -44,11 +44,11 @@
                 @endphp
                 <article class="course-card">
                     <div class="course-card-top">
-                        <span class="course-tag {{ $color }}">Course {{ str_pad($course->id, 2, '0', STR_PAD_LEFT) }}</span>
+                        <span class="course-tag {{ $color }}">Class {{ str_pad($course->id, 2, '0', STR_PAD_LEFT) }}</span>
                     </div>
                     <div class="course-name">
                         <h4>{{ $course->title }}</h4>
-                        <span class="course-list-tag {{ $color }}">Course {{ str_pad($course->id, 2, '0', STR_PAD_LEFT) }}</span>
+                        <span class="course-list-tag {{ $color }}">Class {{ str_pad($course->id, 2, '0', STR_PAD_LEFT) }}</span>
                     </div>
                     <p class="course-teacher">{{ $course->user?->fullName() ?? 'Teacher unassigned' }}</p>
                     <div class="course-card-details">
@@ -60,16 +60,21 @@
                     <span class="course-list-start">{{ \Carbon\Carbon::parse($course->start_date)->format('M d, Y') }}</span>
                     <span class="course-list-end">{{ $course->end_date ? \Carbon\Carbon::parse($course->end_date)->format('M d, Y') : 'Ongoing' }}</span>
                     <span class="course-list-price">${{ number_format($course->price, 2) }}</span>
-                    <button data-url="{{ route('edit.course', $course->id) }}" id="btn-open-create" data-modal-title="Edit Course" class="course-menu" aria-label="Edit {{ $course->title }}"><span>Edit</span><i class="mdi mdi-dots-horizontal"></i></button>
+                    <div class="course-card-actions">
+                        <button data-url="{{ route('edit.course', $course->id) }}" id="btn-open-create" data-modal-title="Edit Class" class="course-menu" aria-label="Edit {{ $course->title }}"><span>Edit</span><i class="mdi mdi-pencil-outline"></i></button>
+                        @can('remove course')
+                            <button type="button" class="record-delete-button" data-delete-record data-delete-url="{{ route('delete.course') }}" data-delete-id="{{ $course->id }}" data-delete-param="remove_id" data-delete-type="class" data-delete-name="{{ $course->title }}" aria-label="Delete {{ $course->title }}"><i class="mdi mdi-delete-outline"></i></button>
+                        @endcan
+                    </div>
                 </article>
             @empty
-                <div class="course-empty">No courses found.</div>
+                <div class="course-empty">No classes found.</div>
             @endforelse
         </div>
 
         @if ($courses->hasPages())
             <div class="course-pagination">
-                <span>Showing {{ $courses->firstItem() }}-{{ $courses->lastItem() }} of {{ $courses->total() }} courses</span>
+                <span>Showing {{ $courses->firstItem() }}-{{ $courses->lastItem() }} of {{ $courses->total() }} classes</span>
                 <div>
                     @if (!$courses->onFirstPage()) <a href="{{ $courses->previousPageUrl() }}">Previous</a> @endif
                     @if ($courses->hasMorePages()) <a href="{{ $courses->nextPageUrl() }}">Next</a> @endif

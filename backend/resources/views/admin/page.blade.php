@@ -82,7 +82,7 @@
         <div class="col-12 reports-page">
             <div class="report-charts">
                 <div class="report-card"><h5>Monthly Attendance Breakdown</h5><div class="report-chart-wrap"><canvas id="attendanceReportChart"></canvas></div></div>
-                <div class="report-card"><h5>Course Performance vs. Attendance</h5><div class="report-chart-wrap"><canvas id="performanceReportChart"></canvas></div></div>
+                <div class="report-card"><h5>Class Performance vs. Attendance</h5><div class="report-chart-wrap"><canvas id="performanceReportChart"></canvas></div></div>
             </div>
             <div class="report-kpis">
                 <div><strong class="blue">{{ $averageScore }}</strong><span>Average Score</span><small>Across all students</small></div>
@@ -132,7 +132,12 @@
                             <span><strong>{{ $course->user_id ? 1 : 0 }}</strong><small>Teacher</small></span>
                             <span><strong>{{ $course->students->count() }}</strong><small>Students</small></span>
                         </div>
-                        <button data-url="{{ route('edit.course', $course->id) }}" id="btn-open-create" data-modal-title="Edit Subject" class="teacher-edit-button">Edit</button>
+                        <div class="subject-card-actions">
+                            <button data-url="{{ route('edit.course', $course->id) }}" id="btn-open-create" data-modal-title="Edit Subject" class="teacher-edit-button">Edit</button>
+                            @can('remove course')
+                                <button type="button" class="teacher-card-delete" data-delete-record data-delete-url="{{ route('delete.course') }}" data-delete-id="{{ $course->id }}" data-delete-param="remove_id" data-delete-type="subject" data-delete-name="{{ $course->title }}">Delete</button>
+                            @endcan
+                        </div>
                     </article>
                 @empty <div class="course-empty">No subjects found.</div> @endforelse
             </div>
@@ -141,7 +146,7 @@
         <div class="col-12"><div class="card admin-card"><div class="card-body">
             <div class="d-flex justify-content-between align-items-center mb-3"><div><h4 class="card-title mb-1">{{ $title }}</h4><p class="text-muted mb-0">Classes are the current subject and schedule source.</p></div><button data-url="{{ route('create.course') }}" id="btn-open-create" data-modal-title="Create Class" class="btn btn-gradient-primary">Add Class</button></div>
             <div class="table-responsive"><table class="table module-table"><thead><tr><th>Class / Subject</th><th>Teacher</th><th>Schedule</th><th>Students</th><th></th></tr></thead><tbody>
-            @forelse ($courses as $course)<tr><td><strong>{{ $course->title }}</strong><br><small class="text-muted">{{ \Illuminate\Support\Str::limit($course->description, 45) }}</small></td><td>{{ $course->user?->fullName() ?? 'Unassigned' }}</td><td>{{ $course->start_date }} - {{ $course->end_date ?? 'Ongoing' }}</td><td>{{ $course->students->count() }}</td><td><button data-url="{{ route('edit.course', $course->id) }}" id="btn-open-create" data-modal-title="Edit Class" class="btn btn-sm btn-outline-primary">Manage</button></td></tr>
+            @forelse ($courses as $course)<tr><td><strong>{{ $course->title }}</strong><br><small class="text-muted">{{ \Illuminate\Support\Str::limit($course->description, 45) }}</small></td><td>{{ $course->user?->fullName() ?? 'Unassigned' }}</td><td>{{ $course->start_date }} - {{ $course->end_date ?? 'Ongoing' }}</td><td>{{ $course->students->count() }}</td><td><div class="record-actions"><button data-url="{{ route('edit.course', $course->id) }}" id="btn-open-create" data-modal-title="Edit Class" class="btn btn-sm btn-outline-primary">Manage</button>@can('remove course')<button type="button" class="btn btn-sm btn-outline-danger" data-delete-record data-delete-url="{{ route('delete.course') }}" data-delete-id="{{ $course->id }}" data-delete-param="remove_id" data-delete-type="class" data-delete-name="{{ $course->title }}">Delete</button>@endcan</div></td></tr>
             @empty <tr><td colspan="5" class="text-center text-muted py-5">No classes available.</td></tr> @endforelse
             </tbody></table></div>
         </div></div></div>

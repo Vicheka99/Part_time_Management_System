@@ -63,9 +63,16 @@
                                 </td>
                                 <td><span class="student-status {{ $atRisk ? 'at-risk' : 'active' }}">{{ $atRisk ? 'At Risk' : 'Active' }}</span></td>
                                 <td>
-                                    <button data-url="{{ route('edit.student', $student->id) }}" id="btn-open-create" data-modal-title="Edit Student" class="student-action" aria-label="Edit {{ $student->first_name }}">
-                                        <i class="mdi mdi-dots-horizontal"></i>
-                                    </button>
+                                    <div class="record-actions">
+                                        <button data-url="{{ route('edit.student', $student->id) }}" id="btn-open-create" data-modal-title="Edit Student" class="student-action" aria-label="Edit {{ $student->first_name }}">
+                                            <i class="mdi mdi-pencil-outline"></i>
+                                        </button>
+                                        @can('remove students')
+                                            <button type="button" class="record-delete-button" data-delete-record data-delete-url="{{ route('delete.student') }}" data-delete-id="{{ $student->id }}" data-delete-param="remove_id" data-delete-type="student" data-delete-name="{{ $student->first_name }} {{ $student->last_name }}" aria-label="Delete {{ $student->first_name }}">
+                                                <i class="mdi mdi-delete-outline"></i>
+                                            </button>
+                                        @endcan
+                                    </div>
                                 </td>
                             </tr>
                         @empty

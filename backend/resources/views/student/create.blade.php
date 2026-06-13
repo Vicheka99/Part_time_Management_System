@@ -27,9 +27,9 @@
             <input type="text" name="username" value="{{ old('username') }}" placeholder="emma.johnson" required>
         </label>
         <label>
-            <span>Course / Grade</span>
+            <span>Class / Grade</span>
             <select name="course_id" required>
-                <option value="">Select course</option>
+                <option value="">Select class</option>
                 @foreach ($courses as $course)
                     <option value="{{ $course->id }}" {{ (string) old('course_id') === (string) $course->id ? 'selected' : '' }}>{{ $course->title }}</option>
                 @endforeach

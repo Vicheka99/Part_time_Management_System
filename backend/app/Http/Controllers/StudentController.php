@@ -7,6 +7,7 @@ use App\Models\Student;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -209,12 +210,29 @@ class StudentController extends Controller
      */
     public function destroy(Request $request)
     {
+        if (!Auth::user()->can('remove students')) {
+            return response()->json(['message' => 'Permission denied.'], 403);
+        }
+
         $student = Student::find($request->remove_id);
         if ($student) {
-            Student::where(Student::ID, $request->remove_id)->delete();
-            return redirect()->back()->with('Success', 'Student Deleted');
-        } else {
-            return redirect()->back()->with('Error', 'Student not found');
+            DB::transaction(function () use ($student) {
+                $user = $student->user;
+                $student->delete();
+                $user?->delete();
+            });
+
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Student deleted successfully.']);
+            }
+
+            return redirect()->back()->with('Success', 'Student deleted successfully.');
         }
+
+        if ($request->expectsJson()) {
+            return response()->json(['message' => 'Student not found.'], 404);
+        }
+
+        return redirect()->back()->with('Error', 'Student not found.');
     }
 }

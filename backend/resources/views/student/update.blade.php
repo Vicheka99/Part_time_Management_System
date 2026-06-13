@@ -29,7 +29,7 @@
             <input type="text" name="username" value="{{ old('username', $student->user?->username) }}" required>
         </label>
         <label>
-            <span>Course / Grade</span>
+            <span>Class / Grade</span>
             <select name="course_id" required>
                 @foreach ($courses as $course)
                     <option value="{{ $course->id }}" {{ (string) old('course_id', $student->course_id) === (string) $course->id ? 'selected' : '' }}>{{ $course->title }}</option>
