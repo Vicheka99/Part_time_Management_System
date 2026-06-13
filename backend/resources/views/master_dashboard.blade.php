@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>@yield('title')</title>
+    <title>@yield('title') | {{ config('app.name') }}</title>
     <link rel="stylesheet" href="{{ asset('assets/vendors/mdi/css/materialdesignicons.min.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/vendors/ti-icons/css/themify-icons.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/vendors/css/vendor.bundle.base.css') }}">
@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="{{ asset('assets/vendors/bootstrap-datepicker/bootstrap-datepicker.min.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/admin-dashboard.css') }}?v={{ filemtime(public_path('assets/css/admin-dashboard.css')) }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/edumanage-theme.css') }}?v={{ filemtime(public_path('assets/css/edumanage-theme.css')) }}">
     <link rel="shortcut icon" href="{{ asset('assets/images/favicon.png') }}" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"
         integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g=="
@@ -29,7 +30,7 @@
     <div class="toast-container position-fixed top-0 end-0 p-3">
         <div id="liveToast" class=" toast text-light" role="alert" aria-live="assertive" aria-atomic="true">
             <div class="toast-header" style="background-color: unset; color:unset;">
-                <strong class="me-auto">Bootstrap</strong>
+                <strong class="me-auto">{{ config('app.name') }}</strong>
                 <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
             </div>
             <div class="toast-body">
@@ -55,9 +56,9 @@
         <nav class="navbar default-layout-navbar col-lg-12 col-12 p-0 fixed-top d-flex flex-row">
             <div class="text-center navbar-brand-wrapper d-flex align-items-center justify-content-start">
                 <a class="navbar-brand brand-logo" href="/"><img src="{{ asset('assets/images/logo.svg') }}"
-                        alt="logo" /></a>
+                        alt="{{ config('app.name') }}" /></a>
                 <a class="navbar-brand brand-logo-mini" href="/"><img
-                        src="{{ asset('assets/images/logo.svg') }}" alt="logo" /></a>
+                        src="{{ asset('assets/images/logo-mini.svg') }}" alt="{{ config('app.name') }}" /></a>
             </div>
             <div class="navbar-menu-wrapper d-flex align-items-stretch">
                 <button class="navbar-toggler navbar-toggler align-self-center" type="button" data-toggle="minimize">
@@ -121,10 +122,8 @@
                 </div>
                 <footer class="footer">
                     <div class="d-sm-flex justify-content-center justify-content-sm-between">
-                        <span class="text-muted text-center text-sm-left d-block d-sm-inline-block">Copyright © 2025 <a
-                                href="https://www.bootstrapdash.com/" target="_blank">EduDash</a></span>
-                        <span class="float-none float-sm-right d-block mt-1 mt-sm-0 text-center">Hand-crafted & made
-                            with <i class="mdi mdi-heart text-danger"></i></span>
+                        <span class="text-muted text-center text-sm-left d-block d-sm-inline-block">&copy; {{ now()->year }} {{ config('app.name') }}. All rights reserved.</span>
+                        <span class="float-none float-sm-right d-block mt-1 mt-sm-0 text-center">School management made simple.</span>
                     </div>
                 </footer>
             </div>
