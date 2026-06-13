@@ -17,7 +17,7 @@
     @php
         $cards = [
             ['show' => $isAdmin, 'label' => 'Total Teachers', 'value' => $totalTeachers, 'detail' => 'Registered users', 'icon' => 'mdi-account-multiple', 'color' => 'danger'],
-            ['show' => true, 'label' => 'Total Courses', 'value' => $totalCourses, 'detail' => 'Available courses', 'icon' => 'mdi-book-open-page-variant', 'color' => 'info'],
+            ['show' => true, 'label' => 'Total Classes', 'value' => $totalCourses, 'detail' => 'Available classes', 'icon' => 'mdi-book-open-page-variant', 'color' => 'info'],
             ['show' => true, 'label' => 'Total Students', 'value' => $totalStudents, 'detail' => 'Enrolled students', 'icon' => 'mdi-school', 'color' => 'success'],
             ['show' => true, 'label' => 'Attendance Today', 'value' => $todayAttendance, 'detail' => $presentToday . ' marked present', 'icon' => 'mdi-calendar-check', 'color' => 'primary'],
         ];

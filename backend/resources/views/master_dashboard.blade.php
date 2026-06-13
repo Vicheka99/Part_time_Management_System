@@ -386,11 +386,12 @@
                 $('[data-course-grid]').toggleClass('list-view', $(this).data('course-view') === 'list');
             });
 
-            $(document).on('click', '[data-delete-teacher]', async function() {
+            $(document).on('click', '[data-delete-record]', async function() {
                 const button = this;
+                const type = button.dataset.deleteType;
                 const result = await Swal.fire({
-                    title: 'Delete teacher?',
-                    text: button.dataset.teacherName + ' will be permanently removed.',
+                    title: 'Delete ' + type + '?',
+                    text: button.dataset.deleteName + ' will be permanently removed.',
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonText: 'Delete',
@@ -402,14 +403,14 @@
                     const formData = new FormData();
                     formData.append('_token', '{{ csrf_token() }}');
                     formData.append('_method', 'DELETE');
-                    formData.append('id', button.dataset.deleteTeacher);
-                    const response = await fetch('{{ route('delete.user') }}', {
+                    formData.append(button.dataset.deleteParam, button.dataset.deleteId);
+                    const response = await fetch(button.dataset.deleteUrl, {
                         method: 'POST',
                         body: formData,
                         headers: {'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest'}
                     });
                     const data = await response.json();
-                    if (!response.ok) throw new Error(data.message || 'Could not delete teacher.');
+                    if (!response.ok) throw new Error(data.message || 'Could not delete ' + type + '.');
                     await refreshDashboardContent(window.location.href);
                     show_toast('Success', data.message);
                 } catch (error) {

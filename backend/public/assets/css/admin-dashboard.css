@@ -268,6 +268,17 @@
     background: transparent;
     font-size: 20px;
 }
+.record-actions { display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
+.record-delete-button {
+    display: inline-grid;
+    width: 34px;
+    height: 34px;
+    place-items: center;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    color: #dc2626;
+    background: #fef2f2;
+}
 .student-table-footer {
     display: flex;
     align-items: center;
@@ -560,6 +571,8 @@
 }
 .teacher-card-edit { border: 1px solid #bfdbfe; color: #2563eb; background: #eff6ff; }
 .teacher-card-delete { border: 1px solid #fecaca; color: #dc2626; background: #fef2f2; }
+.subject-card-actions { display: flex; gap: 8px; }
+.subject-card-actions > button { flex: 1; }
 .attendance-page { color: #526987; }
 .attendance-summary {
     display: grid;
@@ -908,6 +921,7 @@
 .course-tag.rose { color: #be123c; background: #ffe4e6; }
 .course-tag.cyan { color: #0e7490; background: #cffafe; }
 .course-menu { border: 0; color: #607895; background: transparent; font-size: 18px; }
+.course-card-actions { display: flex; align-items: center; justify-content: flex-end; gap: 6px; }
 .course-menu span { display: none; }
 .course-card h4 { margin: 16px 0 5px; color: #080e19; font-size: 17px; font-weight: 600; }
 .course-teacher { margin: 0; color: #607895; font-size: 13px; }

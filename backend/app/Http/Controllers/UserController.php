@@ -162,6 +162,10 @@ class UserController extends Controller
      */
     public function destroy(Request $request)
     {
+        if (!Auth::user()->can('remove users')) {
+            return response()->json(['message' => 'Permission denied.'], 403);
+        }
+
         $user = User::find($request->id);
         if ($user) {
             if ($user->id === Auth::id()) {
@@ -169,7 +173,7 @@ class UserController extends Controller
             }
 
             if ($user->courses()->exists()) {
-                return response()->json(['message' => 'Reassign this teacher\'s courses before deleting the account.'], 422);
+                return response()->json(['message' => 'Reassign this teacher\'s classes before deleting the account.'], 422);
             }
 
             $user->delete();

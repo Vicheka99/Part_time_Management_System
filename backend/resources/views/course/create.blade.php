@@ -3,15 +3,15 @@
 
     <div class="student-form-header">
         <div>
-            <strong>Add New Course</strong>
-            <small>Create a course and assign its teacher and semester dates.</small>
+            <strong>Add New Class</strong>
+            <small>Create a class and assign its teacher and semester dates.</small>
         </div>
-        <span>New Course</span>
+        <span>New Class</span>
     </div>
 
     <div class="student-form-body">
         <label class="form-span-2">
-            <span>Course Title</span>
+            <span>Class Name</span>
             <input type="text" name="title" value="{{ old('title') }}" placeholder="e.g. Mathematics 10A" required>
         </label>
         <label>
@@ -24,7 +24,7 @@
             </select>
         </label>
         <label>
-            <span>Course Price</span>
+            <span>Class Price</span>
             <input type="number" name="price" value="{{ old('price') }}" min="0" step="0.01" placeholder="0.00" required>
         </label>
         <label>
@@ -39,6 +39,6 @@
 
     <div class="student-form-actions">
         <button type="button" class="btn student-cancel-button" data-bs-dismiss="modal">Cancel</button>
-        <button class="btn student-add-button">Add Course</button>
+        <button class="btn student-add-button">Add Class</button>
     </div>
 </form>

@@ -80,10 +80,10 @@ class CourseController extends Controller
             Course::DESCRIPTION => '',
         ]);
         if ($request->expectsJson()) {
-            return response()->json(['message' => 'Course created successfully.', 'redirect' => route('index.course')]);
+            return response()->json(['message' => 'Class created successfully.', 'redirect' => route('index.course')]);
         }
 
-        return back()->with('Success', 'course Created');
+        return back()->with('Success', 'Class created successfully.');
     }
 
     /**
@@ -141,15 +141,15 @@ class CourseController extends Controller
                 Course::USER_ID => $request->teacher_id,
             ]);
             if ($request->expectsJson()) {
-                return response()->json(['message' => 'Course updated successfully.', 'redirect' => route('index.course')]);
+                return response()->json(['message' => 'Class updated successfully.', 'redirect' => route('index.course')]);
             }
 
-            return redirect()->route('index.course')->with('Success', 'course Updated');
+            return redirect()->route('index.course')->with('Success', 'Class updated successfully.');
         } else {
             if ($request->expectsJson()) {
-                return response()->json(['message' => 'Course not found.'], 404);
+                return response()->json(['message' => 'Class not found.'], 404);
             }
-            return redirect()->route('index.course')->with('Error', 'course not found');
+            return redirect()->route('index.course')->with('Error', 'Class not found.');
         }
     }
 
@@ -158,12 +158,31 @@ class CourseController extends Controller
      */
     public function destroy(Request $request)
     {
+        if (!Auth::user()->can(PermissionConstant::REMOVE_COURSE)) {
+            return response()->json(['message' => 'Permission denied.'], 403);
+        }
+
         $course = Course::find($request->remove_id);
         if ($course) {
-            Course::where(Course::ID, $request->remove_id)->delete();
-            return redirect()->back()->with('Success', 'course Deleted');
-        } else {
-            return redirect()->back()->with('Error', 'course not found');
+            if ($course->students()->exists()) {
+                return response()->json([
+                    'message' => 'Reassign or delete the students in this class before deleting it.',
+                ], 422);
+            }
+
+            $course->delete();
+
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Class deleted successfully.']);
+            }
+
+            return redirect()->back()->with('Success', 'Class deleted successfully.');
         }
+
+        if ($request->expectsJson()) {
+            return response()->json(['message' => 'Class not found.'], 404);
+        }
+
+        return redirect()->back()->with('Error', 'Class not found.');
     }
 }

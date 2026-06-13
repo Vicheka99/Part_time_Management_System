@@ -4,15 +4,15 @@
 
     <div class="student-form-header">
         <div>
-            <strong>Edit Course</strong>
-            <small>Update the course teacher, pricing, and semester dates.</small>
+            <strong>Edit Class</strong>
+            <small>Update the class teacher, pricing, and semester dates.</small>
         </div>
-        <span>Course {{ str_pad($course->id, 2, '0', STR_PAD_LEFT) }}</span>
+        <span>Class {{ str_pad($course->id, 2, '0', STR_PAD_LEFT) }}</span>
     </div>
 
     <div class="student-form-body">
         <label class="form-span-2">
-            <span>Course Title</span>
+            <span>Class Name</span>
             <input type="text" name="title" value="{{ old('title', $course->title) }}" required>
         </label>
         <label>
@@ -24,7 +24,7 @@
             </select>
         </label>
         <label>
-            <span>Course Price</span>
+            <span>Class Price</span>
             <input type="number" name="price" value="{{ old('price', $course->price) }}" min="0" step="0.01" required>
         </label>
         <label>
