@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const ROLES = ["Admin", "Teacher", "Student"];
 
 export default function Login() {
+  const navigate = useNavigate();
   const [role, setRole] = useState("Admin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -19,6 +20,7 @@ export default function Login() {
     e.preventDefault();
     // Demo only — replace with real authentication.
     alert(`Signing in as ${role}${email ? ` (${email})` : ""}`);
+    navigate("/");
   }
 
   return (
