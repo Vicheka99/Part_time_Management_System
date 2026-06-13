@@ -13,10 +13,7 @@ class RoleSeeder extends Seeder
      */
     public function run(): void
     {
-        $admin = Role::firstOrCreate(['name'=>'admin']);
+        Role::firstOrCreate(['name'=>'admin']);
         Role::firstOrCreate(['name'=>'employee']);
-
-        $admin->givePermissionTo();
-        
     }
 }

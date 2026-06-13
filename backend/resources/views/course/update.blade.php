@@ -1,39 +1,44 @@
-<form action="{{route('update.course', $course->id)}}" method="POST" class="row">
+<form action="{{ route('update.course', $course->id) }}" method="POST" class="student-form course-form">
     @csrf
     @method('PUT')
-    <div class="col-6 my-2" >
-        <label for="">Title</label>
-        <input type="text" name="title" value="{{$course->title}}" placeholder="Title" class="form-control" id="">
-    </div>
-    <div class="col-6 my-2" >
-        <label for="">Price</label>
-        <input type="text" name="price" value="{{$course->price}}" placeholder="Price" class="form-control" id="">
-    </div>
-    <div class="col-6 my-2" >
-        <label for="">Start Date</label>
-        <input type="date" name="start_date" value="{{$course->start_date}}" class="form-control" id="">
-    </div>
-     <div class="col-6 my-2" >
-        <label for="">End Date</label>
-        <input type="date" name="end_date" value="{{$course->end_date}}" class="form-control" id="">
-    </div>
-     <div class="col-12 my-2" >
-        <label for="">Teacher</label>
-        <select name="teacher_id" id="" class="form-select">
-            <option value="">--- Select Teacher ---</option>
-            @foreach ($teachers as $teacher)
-                <option value="{{$teacher->id}}" @if ($course->user_id === $teacher->id) selected
 
-                @endif>{{$teacher->fullName()}}</option>
-            @endforeach
-        </select>
+    <div class="student-form-header">
+        <div>
+            <strong>Edit Course</strong>
+            <small>Update the course teacher, pricing, and semester dates.</small>
+        </div>
+        <span>Course {{ str_pad($course->id, 2, '0', STR_PAD_LEFT) }}</span>
     </div>
-     <div class="col-12 my-2" >
-        <label for="">Description</label>
-        <textarea name="description" id="" cols="30" class="form-control" rows="10" placeholder="Description">{{$course->description}}</textarea>
+
+    <div class="student-form-body">
+        <label class="form-span-2">
+            <span>Course Title</span>
+            <input type="text" name="title" value="{{ old('title', $course->title) }}" required>
+        </label>
+        <label>
+            <span>Teacher</span>
+            <select name="teacher_id" required>
+                @foreach ($teachers as $teacher)
+                    <option value="{{ $teacher->id }}" {{ (string) old('teacher_id', $course->user_id) === (string) $teacher->id ? 'selected' : '' }}>{{ $teacher->fullName() }}</option>
+                @endforeach
+            </select>
+        </label>
+        <label>
+            <span>Course Price</span>
+            <input type="number" name="price" value="{{ old('price', $course->price) }}" min="0" step="0.01" required>
+        </label>
+        <label>
+            <span>Start Date</span>
+            <input type="date" name="start_date" value="{{ old('start_date', $course->start_date) }}" required>
+        </label>
+        <label>
+            <span>End Date</span>
+            <input type="date" name="end_date" value="{{ old('end_date', $course->end_date) }}">
+        </label>
     </div>
-     <div class="modal-footer">
-        <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <button class="btn btn-primary">Save</button>
+
+    <div class="student-form-actions">
+        <button type="button" class="btn student-cancel-button" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn student-add-button">Save Changes</button>
     </div>
 </form>

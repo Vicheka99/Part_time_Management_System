@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\AuthenticationController;
+use App\Http\Controllers\AdminPageController;
+use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\StudentController;
@@ -49,4 +51,8 @@ Route::middleware(['auth'])->group(function(){
         Route::delete('/student/delete', 'destroy')->name('delete.student');
     });
 
+    Route::post('/attendance', [AttendanceController::class, 'store'])->name('attendance.store');
+    Route::get('/admin/{page}', [AdminPageController::class, 'show'])
+        ->where('page', 'student-add|student-attendance|teacher-classes|class-schedule|class-students|attendance-take|attendance-records|attendance-reports|subject-list|subject-assign|attendance-summary|student-performance|user-management|settings|profile')
+        ->name('admin.page');
 });

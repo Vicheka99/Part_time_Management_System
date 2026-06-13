@@ -1,128 +1,92 @@
 @extends('master_dashboard')
-@section('title')
-    Course | List
-@endsection
+
+@section('title', 'Courses')
 
 @section('content-title')
-    <span class="page-title-icon bg-gradient-primary text-white me-2">
-        <i class="mdi mdi-account-multiple-plus-outline"></i>
-    </span> List Course
+    <span class="student-page-heading">
+        <strong>Courses</strong>
+        <small>{{ $courses->total() }} {{ Str::plural('course', $courses->total()) }} this semester</small>
+    </span>
 @endsection
 
 @section('breadcrumb')
-    <li class="breadcrumb-item"><a href="#">Course</a></li>
-    <li class="breadcrumb-item active" aria-current="page">
-        List Course <i class="mdi mdi-alert-circle-outline icon-sm text-primary align-middle"></i>
-    </li>
+    <button data-url="{{ route('create.course') }}" id="btn-open-create" data-modal-title="New Course" class="btn student-add-button">
+        <i class="mdi mdi-plus"></i> New Course
+    </button>
 @endsection
 
 @section('content-body')
-    <table class="table table-hover table-light text-center" id="show-table">
-        <thead>
-            <tr>
-                <th colspan="7">
-                    <div class="col-12 d-flex justify-content-between">
-                        @can('create course')
-                        <div class="col-3 d-flex justify-content-start">
-                            <button data-url="{{route('create.course')}}" id="btn-open-create" data-modal-title="Create course Form" class="btn btn-primary">Create course</button>
-                        </div>
-                        @endcan
-                        <div class="{{Auth::user()->can('create course') ? 'col-8' : 'col-12' }} d-flex justify-content-end">
-                            <form class="col-8 d-flex" action="{{ route('index.course') }}">
-                                <input type="text" name="search" id="search_txt" placeholder="Search Name..."
-                                    class="form-control me-2">
-                                <button class="btn btn-primary me-2">Search</button>
-                                <a href="{{ route('index.course') }}" class="btn btn-secondary">Clear</a>
-                            </form>
-                        </div>
-                    </div>
-                </th>
-            </tr>
-            <tr>
-                 <th>N<sup>o</sup></th>
-                <th>Title</th>
-                <th>Price</th>
-                <th>Teacher</th>
-                <th>Start Date</th>
-                <th>End Date</th>
-                @canany(['edit course', 'remove course'])
-                    <th>Action</th>
-                @endcanany
-            </tr>
-        </thead>
-        <tbody>
-            @foreach ($courses as $index => $course  )
-                <tr>
-                    <td>{{$index+1}}</td>
-                    <td>{{$course->title}}</td>
-                    <td>{{$course->price}}$</td>
-                    <td>{{$course->user->fullName()}}</td>
-                    <td>{{$course->start_date}}</td>
-                    <td>{{$course->end_date ?? "Not Sure End Date"}}</td>
-                    @canany(['edit course', 'remove course'])
-                        <td>
-                            @can('edit course')
-                                <button class="btn btn-warning" data-url="{{ route('edit.course', $course->id) }}"
-                                    id="btn-open-create" data-modal-title="Edit course Form" data-id="{{ $course->id }}">
-                                    {!! icon_edit() !!} Edit</button>
-                            @endcan
-                            @can('remove course')
-                                <button class="btn btn-danger" id="btn-remove" data-remove-id="{{ $course->id }}" data-bs-toggle="modal" data-bs-target="#removeModal">
-                                {!! icon_remove() !!}Remove</button>
-                            @endcan
-                        </td>
-                    @endcanany
-                </tr>
-            @endforeach
-            <tr>
-                <td colspan="7">
-                    <div class="d-flex col-12 justify-content-end">
-                        @for ($i = 1; $i <= $total_pages; $i++)
-                            <button id="btn-page" data-page-number="{{$i}}"
-                                class="btn btn-page btn-secondary p-2 me-2">{{$i}}</button>
-                        @endfor
-                    </div>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-
-    <!-- Modal -->
-    <div class="modal fade" id="removeModal" tabindex="-1" aria-labelledby="removeModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="removeModalLabel">Remove Course</h1>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form action="{{ route('delete.course') }}" method="POST">
-                        @method('DELETE')
-                        @csrf
-                        <label for="" class="h4">Do you want to remove this course?</label>
-                        <input type="hidden" id="remove-id" name="remove_id">
-                        <div class="mt-2">
-                            <button type="button" data-bs-dismiss="modal" class="btn btn-success">No</button>
-                            <button class="btn btn-danger">Yes</button>
-                        </div>
-                    </form>
-                </div>
+    <div class="col-12 course-directory">
+        <div class="course-toolbar">
+            <form action="{{ route('index.course') }}" class="student-search">
+                <input type="search" name="search" value="{{ request('search') }}" placeholder="Search courses...">
+            </form>
+            <div class="course-view-toggle" aria-label="Course view">
+                <button class="active" type="button" data-course-view="grid" aria-label="Grid view"><i class="mdi mdi-view-grid-outline"></i></button>
+                <button type="button" data-course-view="list" aria-label="List view"><i class="mdi mdi-format-list-bulleted"></i></button>
             </div>
         </div>
+
+        <div class="course-grid" data-course-grid>
+            <div class="course-list-header">
+                <span>Course</span>
+                <span>Teacher</span>
+                <span>Students</span>
+                <span>Start Date</span>
+                <span>End Date</span>
+                <span>Price</span>
+                <span></span>
+            </div>
+            @forelse ($courses as $course)
+                @php
+                    $colors = ['blue', 'purple', 'green', 'amber', 'rose', 'cyan'];
+                    $color = $colors[$loop->index % count($colors)];
+                @endphp
+                <article class="course-card">
+                    <div class="course-card-top">
+                        <span class="course-tag {{ $color }}">Course {{ str_pad($course->id, 2, '0', STR_PAD_LEFT) }}</span>
+                    </div>
+                    <div class="course-name">
+                        <h4>{{ $course->title }}</h4>
+                        <span class="course-list-tag {{ $color }}">Course {{ str_pad($course->id, 2, '0', STR_PAD_LEFT) }}</span>
+                    </div>
+                    <p class="course-teacher">{{ $course->user?->fullName() ?? 'Teacher unassigned' }}</p>
+                    <div class="course-card-details">
+                        <span><i class="mdi mdi-account-outline"></i> {{ $course->students_count }} {{ Str::plural('student', $course->students_count) }}</span>
+                        <span><i class="mdi mdi-calendar-blank-outline"></i> {{ \Carbon\Carbon::parse($course->start_date)->format('M d, Y') }} - {{ $course->end_date ? \Carbon\Carbon::parse($course->end_date)->format('M d, Y') : 'Ongoing' }}</span>
+                        <span><i class="mdi mdi-currency-usd"></i> {{ number_format($course->price, 2) }}</span>
+                    </div>
+                    <span class="course-list-students">{{ $course->students_count }}</span>
+                    <span class="course-list-start">{{ \Carbon\Carbon::parse($course->start_date)->format('M d, Y') }}</span>
+                    <span class="course-list-end">{{ $course->end_date ? \Carbon\Carbon::parse($course->end_date)->format('M d, Y') : 'Ongoing' }}</span>
+                    <span class="course-list-price">${{ number_format($course->price, 2) }}</span>
+                    <button data-url="{{ route('edit.course', $course->id) }}" id="btn-open-create" data-modal-title="Edit Course" class="course-menu" aria-label="Edit {{ $course->title }}"><span>Edit</span><i class="mdi mdi-dots-horizontal"></i></button>
+                </article>
+            @empty
+                <div class="course-empty">No courses found.</div>
+            @endforelse
+        </div>
+
+        @if ($courses->hasPages())
+            <div class="course-pagination">
+                <span>Showing {{ $courses->firstItem() }}-{{ $courses->lastItem() }} of {{ $courses->total() }} courses</span>
+                <div>
+                    @if (!$courses->onFirstPage()) <a href="{{ $courses->previousPageUrl() }}">Previous</a> @endif
+                    @if ($courses->hasMorePages()) <a href="{{ $courses->nextPageUrl() }}">Next</a> @endif
+                </div>
+            </div>
+        @endif
     </div>
 @endsection
+
 @push('script-path')
     <script>
-         $(document).on('click', '#btn-remove', function() {
-
-            var id = $(this).data('remove-id');
-            const urlParams = new URLSearchParams(window.location.search);
-            const search = urlParams.get('search');
-            const pageNumber = urlParams.get('page')
-            $('#remove-id').val(id)
-            $('#search').val(search)
-            $('#page').val(page)
-
-        })
+        document.querySelectorAll('[data-course-view]').forEach(function (button) {
+            button.addEventListener('click', function () {
+                document.querySelectorAll('[data-course-view]').forEach(function (item) { item.classList.remove('active'); });
+                button.classList.add('active');
+                document.querySelector('[data-course-grid]').classList.toggle('list-view', button.dataset.courseView === 'list');
+            });
+        });
     </script>
 @endpush
