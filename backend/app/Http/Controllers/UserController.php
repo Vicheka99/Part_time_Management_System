@@ -20,10 +20,13 @@ class UserController extends Controller
         $user = Auth::user();
         if (Auth::user()->hasPermissionTo('view users')) {
             $search = trim((string) $request->search);
-            $page = max(1, (int) $request->input('page', 1));
-            $total = ($page - 1) * 5;
-
-            $query = User::query();
+            $query = User::query()
+                ->whereHas('roles', fn ($role) => $role->where('name', 'employee'))
+                ->with('courses')
+                ->withCount([
+                    'courses',
+                    'courses as students_count' => fn ($query) => $query->join('students', 'courses.id', '=', 'students.course_id'),
+                ]);
 
             if ($search !== '') {
                 $query->where(function ($q) use ($search) {
@@ -33,13 +36,9 @@ class UserController extends Controller
                 });
             }
 
-            $total_pages = ceil($query->count(User::ID) / 5);
+            $teachers = $query->orderBy(User::FIRST_NAME)->paginate(6)->withQueryString();
 
-            $teachers = $query
-                ->offset($total)
-                ->limit(5)
-                ->get();
-            return view('teacher.index', compact('teachers', 'total_pages'));
+            return view('teacher.index', compact('teachers'));
         } else {
             // about(401);
             return back()->with('Error', 'Permission Denied');
@@ -77,6 +76,9 @@ class UserController extends Controller
         if ($validator->fails()) {
             $errors = $validator->errors();
             $message = implode(", ", $errors->all());
+            if ($request->expectsJson()) {
+                return response()->json(['message' => $message, 'errors' => $errors], 422);
+            }
             return back()->with("Error", $message);
         }
 
@@ -85,13 +87,17 @@ class UserController extends Controller
             User::FIRST_NAME => $request->first_name,
             User::LAST_NAME  => $request->last_name,
             User::GENDER     => $request->gender,
-            User::PROFILE    => $request->profile_name,
+            User::PROFILE    => $request->profile_name ?: null,
             User::EMAIL      => $request->email,
             User::PASSWORD   => $request->password,
             User::CREATED_BY => 1,
         ]);
 
         $user->assignRole('employee');
+        if ($request->expectsJson()) {
+            return response()->json(['message' => 'Teacher created successfully.', 'redirect' => route('index.user')]);
+        }
+
         return back()->with('Success', 'Teacher Create Successfully');
     }
 
@@ -127,6 +133,9 @@ class UserController extends Controller
         if ($validator->fails()) {
             $errors = $validator->errors();
             $message = implode(", ", $errors->all());
+            if ($request->expectsJson()) {
+                return response()->json(['message' => $message, 'errors' => $errors], 422);
+            }
             return back()->with("Error", $message);
         }
 
@@ -136,9 +145,13 @@ class UserController extends Controller
                 User::FIRST_NAME => $request->first_name,
                 User::LAST_NAME  => $request->last_name,
                 User::GENDER     => $request->gender,
-                User::PROFILE    => $request->profile_name,
+                User::PROFILE    => $request->filled('profile_name') ? $request->profile_name : $user->profile,
                 User::EMAIL      => $request->email,
             ]);
+        }
+
+        if ($request->expectsJson()) {
+            return response()->json(['message' => 'Teacher updated successfully.', 'redirect' => route('index.user')]);
         }
 
         return back()->with('Success', 'Teacher Update Successfully');
@@ -149,34 +162,21 @@ class UserController extends Controller
      */
     public function destroy(Request $request)
     {
-
         $user = User::find($request->id);
         if ($user) {
-            User::where('id', $request->id)->delete();
-            $search = $request->search;
-            $page = $request->page;
-            $total = ($page - 1) * 5;
-            if ($search) {
-                $teachers = User::where(User::FIRST_NAME, 'like', '%' . $search . '%')
-                    ->orWhere(User::LAST_NAME, 'like', '%' . $search . '%')
-                    ->offset($total)
-                    ->limit(5)
-                    ->get();
-                $total_pages = User::where(User::FIRST_NAME, 'like', '%' . $search . '%')
-                    ->orWhere(User::LAST_NAME, 'like', '%' . $search . '%')
-                    ->count(User::ID);
-
-                $total_pages = ceil($total_pages /  5);
-            } else {
-                $teachers = User::offset($total)->limit(5)->get();
-                $total_pages = ceil(User::count(User::ID) / 5);
+            if ($user->id === Auth::id()) {
+                return response()->json(['message' => 'You cannot delete your own account.'], 422);
             }
 
-            return response()->json(["message" => "Teacher Remove Successfully", "status" => 200, 'data' => $teachers, 'total_page'=>$total_pages]);
-        } else {
-            return response()->json(["message" => "Teacher Not Found", "status" => 404]);
+            if ($user->courses()->exists()) {
+                return response()->json(['message' => 'Reassign this teacher\'s courses before deleting the account.'], 422);
+            }
+
+            $user->delete();
+
+            return response()->json(['message' => 'Teacher deleted successfully.']);
         }
 
-        return response()->json('remove', 'teacher remove successfully');
+        return response()->json(['message' => 'Teacher not found.'], 404);
     }
 }

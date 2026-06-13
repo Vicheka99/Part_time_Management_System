@@ -1,64 +1,60 @@
-<form action="{{ route('update.student', $student->id) }}" method="POST" class="row">
+<form action="{{ route('update.student', $student->id) }}" method="POST" class="student-form">
     @csrf
     @method('PUT')
-    <div class="col-6 my-2">
-        <label for="">First Name</label>
-        <input type="text" name="first_name" value="{{ $student->first_name }}" placeholder="First Name"
-            class="form-control" id="">
-    </div>
-    <div class="col-6 my-2">
-        <label for="">Last Name</label>
-        <input type="text" name="last_name" value="{{ $student->last_name }}" placeholder="Last Name"
-            class="form-control" id="">
-    </div>
-    <div class="col-6 my-2">
-        <label for="">Username</label>
-        <input type="text" name="username" value="{{ $student->user->username ?? '' }}" placeholder="Username" class="form-control" id="">
-    </div>
-    <div class="col-6 my-2">
-        <label for="">Email</label>
-        <input type="email" name="email" value="{{ $student->user->email ?? '' }}" placeholder="Email" class="form-control" id="">
-    </div>
-    <div class="col-6 my-2">
-        <label for="gender">Gender:</label>
-        <div class="d-flex">
-            <div class="me-2 my-2">
-                <input type="radio" name="gender" {{ $student->gender == 'Male' ? 'checked' : '' }} id="male"
-                    value="Male"> <label for="Male">Male</label>
-            </div>
-            <div class="me-2 my-2">
-                <input type="radio" name="gender" {{ $student->gender == 'Female' ? 'checked' : '' }} id="female"
-                    value="Female"> <label for="Female">Female</label>
-            </div>
+    <input type="hidden" name="score" value="{{ $student->score }}">
+
+    <div class="student-form-header">
+        <div>
+            <strong>Edit Student</strong>
+            <small>Update the student's account and enrollment details.</small>
         </div>
-    </div>
-    <div class="col-6 my-2">
-        <label for="">Score</label>
-        <input type="text" name="score" value="{{ $student->score }}" placeholder="Score" class="form-control"
-            id="">
-    </div>
-    <div class="col-6 my-2">
-        <label for="">Status</label>
-        <select name="status" id="" class="form-select">
-            <option value="">Select Status</option>
-            <option value="Active" {{ $student->status == 'Active' ? 'selected' : '' }}>Active</option>
-            <option value="Inactive" {{ $student->status == 'Inactive' ? 'selected' : '' }}>Inactive</option>
-        </select>
+        <span>STU-{{ str_pad($student->id, 4, '0', STR_PAD_LEFT) }}</span>
     </div>
 
-    <div class="col-6 my-2">
-        <label for="">Course</label>
-        <select name="course_id" id="" class="form-select">
-            @foreach ($courses as $course)
-                <option value="{{ $course->id }}" {{ $student->course_id == $course->id ? 'selected' : '' }}>
-                    {{ $course->title }}
-                </option>
-            @endforeach
-        </select>
+    <div class="student-form-body">
+        <label>
+            <span>First Name</span>
+            <input type="text" name="first_name" value="{{ old('first_name', $student->first_name) }}" required>
+        </label>
+        <label>
+            <span>Last Name</span>
+            <input type="text" name="last_name" value="{{ old('last_name', $student->last_name) }}" required>
+        </label>
+        <label>
+            <span>Email Address</span>
+            <input type="email" name="email" value="{{ old('email', $student->user?->email) }}" required>
+        </label>
+        <label>
+            <span>Username</span>
+            <input type="text" name="username" value="{{ old('username', $student->user?->username) }}" required>
+        </label>
+        <label>
+            <span>Course / Grade</span>
+            <select name="course_id" required>
+                @foreach ($courses as $course)
+                    <option value="{{ $course->id }}" {{ (string) old('course_id', $student->course_id) === (string) $course->id ? 'selected' : '' }}>{{ $course->title }}</option>
+                @endforeach
+            </select>
+        </label>
+        <label>
+            <span>Status</span>
+            <select name="status" required>
+                @foreach (['Active', 'At Risk', 'Inactive'] as $status)
+                    <option value="{{ $status }}" {{ old('status', $student->status) === $status ? 'selected' : '' }}>{{ $status }}</option>
+                @endforeach
+            </select>
+        </label>
+        <fieldset>
+            <legend>Gender</legend>
+            <div class="student-choice-group">
+                <label><input type="radio" name="gender" value="Male" {{ old('gender', $student->gender) === 'Male' ? 'checked' : '' }} required><span>Male</span></label>
+                <label><input type="radio" name="gender" value="Female" {{ old('gender', $student->gender) === 'Female' ? 'checked' : '' }}><span>Female</span></label>
+            </div>
+        </fieldset>
     </div>
 
-    <div class="modal-footer">
-        <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <button class="btn btn-primary">Save</button>
+    <div class="student-form-actions">
+        <button type="button" class="btn student-cancel-button" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn student-add-button">Save Changes</button>
     </div>
 </form>

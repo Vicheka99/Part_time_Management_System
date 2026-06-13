@@ -21,31 +21,21 @@ class CourseController extends Controller
         if (!Auth::user()->can(PermissionConstant::VIEW_COURSE)) {
             return back()->with('Error', 'Permission Denied');
         }
-        $search = $request->search;
-        $page = $request->page;
-        $total = ($page - 1) * 5;
-        if ($search) {
+        $query = Course::query()->with('user')->withCount('students');
 
-            $courses = Course::orderBy('id', 'desc')
-                ->where(Course::TITLE, 'like', '%' . $search . '%')
-                ->offset($total)
-                ->limit(5)
-                ->get();
-
-            $total_pages = Course::orderBy('id', 'desc')
-                ->where(Course::TITLE, 'like', '%' . $search . '%')
-                ->count(Course::ID);
-
-            $total_pages = ceil($total_pages /  5);
-        } else {
-            $courses = Course::orderBy('id', 'desc')
-                ->offset($total)
-                ->limit(5)
-                ->get();
-            $total_pages = ceil(Course::count(Course::ID) / 5);
+        if ($search = $request->string('search')->trim()->toString()) {
+            $query->where(function ($query) use ($search) {
+                $query->where(Course::TITLE, 'like', '%' . $search . '%')
+                    ->orWhereHas('user', function ($user) use ($search) {
+                        $user->where('first_name', 'like', '%' . $search . '%')
+                            ->orWhere('last_name', 'like', '%' . $search . '%');
+                    });
+            });
         }
 
-        return view('course.index', compact('courses', 'total_pages'));
+        $courses = $query->orderByDesc(Course::ID)->paginate(6)->withQueryString();
+
+        return view('course.index', compact('courses'));
     }
 
     /**
@@ -75,6 +65,9 @@ class CourseController extends Controller
         if ($validator->fails()) {
             $errors = $validator->messages();
             $messsage = implode(", ", $errors->all());
+            if ($request->expectsJson()) {
+                return response()->json(['message' => $messsage, 'errors' => $errors], 422);
+            }
             return back()->with("Error", $messsage);
         }
 
@@ -84,8 +77,12 @@ class CourseController extends Controller
             Course::START_DATE => $request->start_date,
             Course::END_DATE => $request->end_date,
             Course::USER_ID => $request->teacher_id,
-            Course::DESCRIPTION => $request->description
+            Course::DESCRIPTION => '',
         ]);
+        if ($request->expectsJson()) {
+            return response()->json(['message' => 'Course created successfully.', 'redirect' => route('index.course')]);
+        }
+
         return back()->with('Success', 'course Created');
     }
 
@@ -130,6 +127,9 @@ class CourseController extends Controller
             if ($validator->fails()) {
                 $errors = $validator->messages();
                 $messsage = implode(", ", $errors->all());
+                if ($request->expectsJson()) {
+                    return response()->json(['message' => $messsage, 'errors' => $errors], 422);
+                }
                 return back()->with("Error", $messsage);
             }
 
@@ -139,10 +139,16 @@ class CourseController extends Controller
                 Course::START_DATE => $request->start_date,
                 Course::END_DATE => $request->end_date,
                 Course::USER_ID => $request->teacher_id,
-                Course::DESCRIPTION => $request->description
             ]);
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Course updated successfully.', 'redirect' => route('index.course')]);
+            }
+
             return redirect()->route('index.course')->with('Success', 'course Updated');
         } else {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Course not found.'], 404);
+            }
             return redirect()->route('index.course')->with('Error', 'course not found');
         }
     }

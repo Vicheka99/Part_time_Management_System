@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Course;
 use App\Models\Student;
+use App\Models\Attendance;
 use Illuminate\Auth\Events\Validated;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
@@ -16,9 +17,11 @@ class HomeController extends Controller
         $totalTeachers = User::count();
         $totalCourses = Course::count();
         $totalStudents = Student::count();
+        $todayAttendance = Attendance::whereDate('attendance_date', today())->count();
+        $presentToday = Attendance::whereDate('attendance_date', today())->where('status', 'present')->count();
         $isAdmin = in_array('admin', auth()->user()->getRoleNames()->toArray());
 
-        return view('index', compact('totalTeachers', 'totalCourses', 'totalStudents', 'isAdmin'));
+        return view('index', compact('totalTeachers', 'totalCourses', 'totalStudents', 'todayAttendance', 'presentToday', 'isAdmin'));
     }
 
     /**

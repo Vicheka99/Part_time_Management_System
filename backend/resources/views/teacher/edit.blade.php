@@ -1,62 +1,23 @@
-@extends('master_dashboard')
-@section('title')
-    Teacher | Update
-@endsection
-
-@section('content-title')
-    <span class="page-title-icon bg-gradient-primary text-white me-2">
-        <i class="mdi mdi-home"></i>
-    </span> Update Teacher
-@endsection
-
-@section('breadcrumb')
-    <li class="breadcrumb-item"><a href="#">Teacher</a></li>
-    <li class="breadcrumb-item active" aria-current="page">
-        Update Teacher <i class="mdi mdi-alert-circle-outline icon-sm text-primary align-middle"></i>
-    </li>
-
-@endsection
-
-@section('content-body')
-    <div class="col-8 mx-auto bg-white py-3">
-        <form action="{{route('edit.user', $user->id)}}" method="POST" enctype="multipart/form-data" class="row">
-            @csrf
-            @method('PUT')
-            <div class="col-6 my-2">
-                <label for="first_name">First Name:</label>
-                <input type="text" name="first_name" value="{{$user->first_name}}" placeholder="First Name" class="form-control">
-            </div>
-            <div class="col-6 my-2">
-                <label for="last_name">Last Name:</label>
-                <input type="text" name="last_name" value="{{$user->last_name}}" placeholder="Last Name" class="form-control">
-            </div>
-            <div class="col-6 my-2">
-                <label for="gender">Gender:</label>
-                <div class="d-flex">
-                    <div class="me-2 my-2">
-                        <input type="radio" name="gender" {{$user->gender == "Male" ? 'checked' : ''}} id="male" value="Male"> <label for="Male">Male</label>
-                    </div>
-                    <div class="me-2 my-2">
-                        <input type="radio" name="gender" {{$user->gender == "Female" ? 'checked' : ''}} id="female" value="Female"> <label for="Female">Female</label>
-                    </div>
-                </div>
-            </div>
-            <div class="col-6 my-2">
-                <label for="email">Email:</label>
-                <input type="text" name="email" value="{{$user->email}}" placeholder="Email" class="form-control">
-            </div>
-            <div class="col-6 my-2">
-                <label for="profile">Profile:</label>
-                <input type="file" name="profile" class="form-control" id="profile">
-                 <input type="hidden" name="profile_name" value="{{$user->profile}}" class="form-control my-2 " id="profile_name">
-                <div class="preview-profile border border-1 border-dark mt-2 " style="width: fit-content; cursor: pointer;">
-                    <img src="{{asset('assets/images/teacher/'.$user->profile)}}" id="show-profile" alt="" style="width: 120px;">
-                </div>
-            </div>
-            <div class="col-12 my-2 d-flex justify-content-end">
-                <a href="{{route('index.user')}}" class="btn btn-secondary me-2">Back</a>
-                <button class="btn btn-primary me-2">Save</button>
-            </div>
-        </form>
+<form action="{{ route('update.user', $user->id) }}" method="POST" enctype="multipart/form-data" class="student-form teacher-form">
+    @csrf
+    @method('PUT')
+    <div class="student-form-header">
+        <div><strong>Edit Teacher</strong><small>Update personal details and profile photo.</small></div>
+        <span>TCH-{{ str_pad($user->id, 3, '0', STR_PAD_LEFT) }}</span>
     </div>
-@endsection
+    <div class="student-form-body">
+        <label><span>First Name</span><input type="text" name="first_name" value="{{ $user->first_name }}" required></label>
+        <label><span>Last Name</span><input type="text" name="last_name" value="{{ $user->last_name }}" required></label>
+        <label class="form-span-2"><span>Email Address</span><input type="email" name="email" value="{{ $user->email }}" required></label>
+        <fieldset><legend>Gender</legend><div class="student-choice-group">
+            <label><input type="radio" name="gender" value="Male" {{ $user->gender === 'Male' ? 'checked' : '' }} required><span>Male</span></label>
+            <label><input type="radio" name="gender" value="Female" {{ $user->gender === 'Female' ? 'checked' : '' }}><span>Female</span></label>
+        </div></fieldset>
+        <label class="teacher-profile-field"><span>Profile Photo</span><input type="file" name="profile" id="profile" accept="image/*"><input type="hidden" name="profile_name" value="{{ $user->profile }}" id="profile_name"></label>
+        <button type="button" class="teacher-profile-preview preview-profile"><img src="{{ $user->profile ? asset('assets/images/teacher/' . $user->profile) : asset('assets/images/uploadimage.jpg') }}" id="show-profile" alt=""><span>{{ $user->profile ? 'Change' : 'Choose' }} profile photo</span></button>
+    </div>
+    <div class="student-form-actions">
+        <button type="button" class="btn student-cancel-button" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn student-add-button">Save Changes</button>
+    </div>
+</form>

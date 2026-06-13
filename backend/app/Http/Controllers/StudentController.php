@@ -19,26 +19,31 @@ class StudentController extends Controller
      */
     public function index(Request $request)
     {
+        $query = Student::query()
+            ->with(['course', 'user'])
+            ->withCount([
+                'attendances',
+                'attendances as attended_count' => fn ($query) => $query->whereIn('status', ['present', 'late']),
+            ]);
 
-        $search = $request->search;
-            $page = $request->page;
-            $total = ($page - 1) * 5;
-            if ($search) {
-                $students = Student::where(Student::FIRST_NAME, 'like', '%' . $search . '%')
+        if ($search = $request->string('search')->trim()->toString()) {
+            $query->where(function ($query) use ($search) {
+                $query->where(Student::FIRST_NAME, 'like', '%' . $search . '%')
                     ->orWhere(Student::LAST_NAME, 'like', '%' . $search . '%')
-                    ->offset($total)
-                    ->limit(5)
-                    ->get();
-                $total_pages = Student::where(Student::FIRST_NAME, 'like', '%' . $search . '%')
-                    ->orWhere(Student::LAST_NAME, 'like', '%' . $search . '%')
-                    ->count(Student::ID);
+                    ->orWhere(Student::ID, 'like', '%' . $search . '%')
+                    ->orWhereHas('user', fn ($user) => $user->where('email', 'like', '%' . $search . '%'));
+            });
+        }
 
-                $total_pages = ceil($total_pages /  5);
-            } else {
-                $students = Student::offset($total)->limit(5)->get();
-                $total_pages = ceil(Student::count(Student::ID) / 5);
-            }
-            return view('student.index', compact('students', 'total_pages'));
+        if ($request->get('filter') === 'active') {
+            $query->whereRaw('LOWER(status) = ?', ['active']);
+        } elseif ($request->get('filter') === 'at-risk') {
+            $query->whereRaw('LOWER(status) IN (?, ?)', ['inactive', 'at risk']);
+        }
+
+        $students = $query->orderBy(Student::FIRST_NAME)->paginate(8)->withQueryString();
+
+        return view('student.index', compact('students'));
     }
 
     /**
@@ -46,9 +51,10 @@ class StudentController extends Controller
      */
     public function create()
     {
-
         $courses = Course::get(['id', 'title'])->all();
-        return view('student.create', compact('courses'));
+        $nextStudentId = 'STU-' . str_pad((Student::max(Student::ID) ?? 0) + 1, 4, '0', STR_PAD_LEFT);
+
+        return view('student.create', compact('courses', 'nextStudentId'));
     }
 
     /**
@@ -60,7 +66,6 @@ class StudentController extends Controller
             "first_name" => ['required', 'min:2', 'max:10'],
             "last_name" => ['required', 'min:2', 'max:10'],
             "gender" => ['required', 'min:4', 'max:6'],
-            "score" => ['required', 'max:3'],
             "status" => ['required'],
             "course_id" => ['required'],
             'email' => ['required', 'email', Rule::unique(User::TABLE_NAME, User::EMAIL)],
@@ -71,6 +76,9 @@ class StudentController extends Controller
         if ($validator->fails()) {
             $errors = $validator->errors();
             $message = implode(", ", $errors->all());
+            if ($request->expectsJson()) {
+                return response()->json(['message' => $message, 'errors' => $errors], 422);
+            }
             return back()->with("Error", $message);
         }
 
@@ -96,7 +104,7 @@ class StudentController extends Controller
             Student::FIRST_NAME => $request->first_name,
             Student::LAST_NAME  => $request->last_name,
             Student::GENDER     => $request->gender,
-            Student::SCORE      => $request->score,
+            Student::SCORE      => 0,
             Student::STATUS     => $request->status,
             Student::COURSE_ID  => $request->course_id,
             Student::USER_ID    => $studentUser->id,
@@ -107,6 +115,10 @@ class StudentController extends Controller
             $studentUser->username,
             $generatedPassword
         );
+
+        if ($request->expectsJson()) {
+            return response()->json(['message' => $successMessage, 'redirect' => route('index.student')]);
+        }
 
         return back()->with('Success', $successMessage);
     }
@@ -151,6 +163,9 @@ class StudentController extends Controller
         if ($validator->fails()) {
             $errors = $validator->errors();
             $message = implode(", ", $errors->all());
+            if ($request->expectsJson()) {
+                return response()->json(['message' => $message, 'errors' => $errors], 422);
+            }
             return back()->with("Error", $message);
         }
 
@@ -176,8 +191,15 @@ class StudentController extends Controller
                 ]);
             }
 
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Student updated successfully.', 'redirect' => route('index.student')]);
+            }
+
             return redirect()->route('index.student')->with('Success', 'Student Updated');
         } else {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Student not found.'], 404);
+            }
             return redirect()->route('index.student')->with('Error', 'Student not found');
         }
     }
